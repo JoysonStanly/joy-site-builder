@@ -11,6 +11,19 @@ interface ProjectPreviewProps {
     showEditorPanel?: boolean;
 }
 
+interface SelectedElement {
+    tagName: string;
+    className: string;
+    text: string;
+    styles: {
+        padding: string;
+        margin: string;
+        backgroundColor: string;
+        color: string;
+        fontSize: string;
+    };
+}
+
 export interface ProjectPreviewRef {
     getCode: ()=> string | undefined;
 }
@@ -18,7 +31,7 @@ export interface ProjectPreviewRef {
 const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(({project, isGenerating, device = 'desktop', showEditorPanel = true}, ref) => {
 
     const iframeRef = useRef<HTMLIFrameElement>(null)
-    const [selectedElement, setSelectedElement] = useState<any>(null)
+    const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null)
 
     const resolutions = {
         phone: 'w-[412px]',
@@ -63,7 +76,7 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(({proj
         return ()=> window.removeEventListener('message', handleMessage)
     },[])
 
-    const handleUpdate = (updates: any)=>{
+    const handleUpdate = (updates: Record<string, unknown>)=>{
         if(iframeRef.current?.contentWindow){
             iframeRef.current.contentWindow.postMessage({
                 type: 'UPDATE_ELEMENT',

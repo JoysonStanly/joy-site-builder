@@ -5,6 +5,7 @@ import { authClient } from '@/lib/auth-client';
 import {UserButton} from '@daveyplate/better-auth-ui'
 import api from '@/configs/axios';
 import { toast } from 'sonner';
+import type { AxiosError } from 'axios';
 
 const Navbar = () => {
     const [menuOpen, setMenuOpen] = React.useState(false);
@@ -17,7 +18,8 @@ const Navbar = () => {
       try {
         const {data} = await api.get('/api/user/credits');
         setCredits(data.credits)
-      } catch (error: any) {
+      } catch (err) {
+        const error = err as AxiosError<{message: string}>;
         toast.error(error?.response?.data?.message || error.message)
         console.log(error);
       }
@@ -25,8 +27,9 @@ const Navbar = () => {
 
     useEffect(()=>{
       if(session?.user){
-        getCredits()
+        void getCredits()
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[session?.user])
 
   return (

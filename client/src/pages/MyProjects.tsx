@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 import type { Project } from '../types';
 import { Loader2Icon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { dummyProjects } from '../assets/assets';
 import Footer from '../components/Footer';
 import api from '@/configs/axios';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
+import type { AxiosError } from 'axios';
 
 const MyProjects = () => {
     const {data: session, isPending} = authClient.useSession()
@@ -19,7 +19,8 @@ const MyProjects = () => {
             const { data } = await api.get('/api/user/projects')
             setProjects(data.projects)
             setLoading(false)
-        } catch (error: any) {
+        } catch (err) {
+            const error = err as AxiosError<{message: string}>;
             console.log(error);
             toast.error(error?.response?.data?.message || error.message)
         }
@@ -32,7 +33,8 @@ const MyProjects = () => {
             const { data } = await api.delete(`/api/project/${projectId}`)
             toast.success(data.message);
             fetchProjects()
-        } catch (error: any) {
+        } catch (err) {
+            const error = err as AxiosError<{message: string}>;
             console.log(error);
             toast.error(error?.response?.data?.message || error.message)
         }
@@ -40,11 +42,12 @@ const MyProjects = () => {
 
     useEffect(()=>{
         if(session?.user && !isPending){
-            fetchProjects()
+            void fetchProjects()
         }else if(!isPending && !session?.user){
             navigate('/');
             toast('Please login to view your projects');
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[session?.user])
   return (
     <>

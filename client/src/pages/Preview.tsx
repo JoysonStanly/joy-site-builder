@@ -6,6 +6,7 @@ import type { Project, Version } from "../types";
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import type { AxiosError } from "axios";
 
 
 const Preview = () => {
@@ -27,7 +28,8 @@ const Preview = () => {
       })
     }
     setLoading(false)
-   } catch (error: any) {
+   } catch (err) {
+    const error = err as AxiosError<{message: string}>;
     toast.error(error?.response?.data?.message || error.message);
     console.log(error);
    }
@@ -35,8 +37,9 @@ const Preview = () => {
 
   useEffect(()=>{
     if(!isPending && session?.user){
-      fetchCode()
+      void fetchCode()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[session?.user])
 
   if(loading){

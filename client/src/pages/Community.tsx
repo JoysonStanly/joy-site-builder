@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import type { Project } from '../types';
-import { Loader2Icon, PlusIcon, TrashIcon } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import api from '@/configs/axios';
 import { toast } from 'sonner';
+import type { AxiosError } from 'axios';
 
 const Community = () => {
     const [loading, setLoading] = useState(true);
@@ -16,14 +17,16 @@ const Community = () => {
         const { data } = await api.get('/api/project/published');
         setProjects(data.projects);
         setLoading(false);
-       } catch (error: any) {
+       } catch (err) {
+        const error = err as AxiosError<{message: string}>;
         console.log(error);
         toast.error(error?.response?.data?.message || error.message);
        }
     }
 
     useEffect(()=>{
-        fetchProjects()
+        void fetchProjects()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
   return (
     <>

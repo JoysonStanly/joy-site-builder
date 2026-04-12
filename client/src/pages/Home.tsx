@@ -4,6 +4,7 @@ import { Loader2Icon } from 'lucide-react';
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import type { AxiosError } from 'axios';
 
 const Home = () => {
 
@@ -25,8 +26,9 @@ const Home = () => {
       const {data} = await api.post('/api/user/project', {initial_prompt: input});
       setLoading(false);
       navigate(`/projects/${data.projectId}`)
-    } catch (error: any) {
+    } catch (err) {
       setLoading(false);
+      const error = err as AxiosError<{message: string}>;
       toast.error(error?.response?.data?.message || error.message);
       console.log(error);
     }

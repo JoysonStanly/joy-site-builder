@@ -4,6 +4,7 @@ import { BotIcon, EyeIcon, Loader2Icon, SendIcon, UserIcon } from 'lucide-react'
 import { Link } from 'react-router-dom';
 import api from '@/configs/axios';
 import { toast } from 'sonner';
+import type { AxiosError } from 'axios';
 
 interface SidebarProps {
     isMenuOpen: boolean;
@@ -22,7 +23,8 @@ const Sidebar = ({isMenuOpen, project, setProject, isGenerating, setIsGenerating
         try {
             const { data } = await api.get(`/api/user/project/${project.id}`)
             setProject(data.project)
-        } catch (error: any) {
+        } catch (err) {
+            const error = err as AxiosError<{message: string}>;
             toast.error(error?.response?.data?.message || error.message);
             console.log(error);
         }
@@ -39,8 +41,9 @@ const Sidebar = ({isMenuOpen, project, setProject, isGenerating, setIsGenerating
             setProject(data2.project)
             setIsGenerating(false)
 
-        } catch (error: any) {
+        } catch (err) {
             setIsGenerating(false)
+            const error = err as AxiosError<{message: string}>;
             toast.error(error?.response?.data?.message || error.message);
             console.log(error);
         }
@@ -60,8 +63,9 @@ const Sidebar = ({isMenuOpen, project, setProject, isGenerating, setIsGenerating
             setInput('')
             clearInterval(interval)
             setIsGenerating(false);
-        } catch (error: any) {
+        } catch (err) {
             setIsGenerating(false);
+            const error = err as AxiosError<{message: string}>;
             toast.error(error?.response?.data?.message || error.message);
             console.log(error);
             clearInterval(interval)
