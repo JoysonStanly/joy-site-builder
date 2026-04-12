@@ -14,22 +14,21 @@ const Navbar = () => {
 
     const {data: session} = authClient.useSession()
 
-    const getCredits = async () => {
-      try {
-        const {data} = await api.get('/api/user/credits');
-        setCredits(data.credits)
-      } catch (err) {
-        const error = err as AxiosError<{message: string}>;
-        toast.error(error?.response?.data?.message || error.message)
-        console.log(error);
-      }
-    }
-
     useEffect(()=>{
+      const getCredits = async () => {
+        try {
+          const {data} = await api.get('/api/user/credits');
+          setCredits(data.credits)
+        } catch (err) {
+          const error = err as AxiosError<{message: string}>;
+          toast.error(error?.response?.data?.message || error.message)
+          console.log(error);
+        }
+      }
+
       if(session?.user){
         void getCredits()
       }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[session?.user])
 
   return (

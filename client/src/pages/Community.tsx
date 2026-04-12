@@ -12,21 +12,26 @@ const Community = () => {
     const [projects, setProjects] = useState<Project[]>([])
     const navigate = useNavigate()
 
-    const fetchProjects = async () => {
-       try {
-        const { data } = await api.get('/api/project/published');
-        setProjects(data.projects);
-        setLoading(false);
-       } catch (err) {
-        const error = err as AxiosError<{message: string}>;
-        console.log(error);
-        toast.error(error?.response?.data?.message || error.message);
-       }
-    }
-
     useEffect(()=>{
-        void fetchProjects()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        let cancelled = false;
+
+        api.get('/api/project/published')
+            .then(({ data }) => {
+                if (cancelled) return;
+                setProjects(data.projects);
+                setLoading(false);
+            })
+            .catch((err: unknown) => {
+                if (cancelled) return;
+                const error = err as AxiosError<{message: string}>;
+                console.log(error);
+                toast.error(error?.response?.data?.message || error.message);
+                setLoading(false);
+            });
+
+        return () => {
+            cancelled = true;
+        }
     },[])
   return (
     <>

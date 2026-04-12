@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import api from '@/configs/axios';
+import type { AxiosError } from 'axios';
 
 interface Plan {
     id: string;
@@ -23,8 +24,9 @@ const Pricing = () => {
         try {
             if(!session?.user) return toast('Please login to purchase credits')
             const {data} = await api.post('/api/user/purchase-credits', {planId})
-            window.location.href = data.payment_link;
-        } catch (error: any) {
+            window.location.assign(data.payment_link);
+        } catch (err: unknown) {
+            const error = err as AxiosError<{message: string}>;
             toast.error(error?.response?.data?.message || error.message);
             console.log(error);
         }
