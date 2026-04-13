@@ -6,10 +6,20 @@ import prisma from "./prisma.js";
 const normalizeOrigin = (origin: string) =>
   origin.trim().replace(/^['\"]|['\"]$/g, '').replace(/\/$/, '');
 
-const trustedOrigins = process.env.TRUSTED_ORIGINS
+const defaultTrustedOrigins = [
+  'http://localhost:5173',
+  'https://site-builder-static.onrender.com',
+];
+
+const envTrustedOrigins = process.env.TRUSTED_ORIGINS
   ?.split(',')
   .map(normalizeOrigin)
   .filter(Boolean) || [];
+
+const trustedOrigins = Array.from(new Set([
+  ...defaultTrustedOrigins,
+  ...envTrustedOrigins,
+]));
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {

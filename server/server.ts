@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import 'dotenv/config';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './lib/auth.js';
 import userRouter from './routes/userRoutes.js';
@@ -19,17 +19,38 @@ const envTrustedOrigins = process.env.TRUSTED_ORIGINS
     .map(normalizeOrigin)
     .filter(Boolean) || [];
 
-const trustedOrigins = [
+const defaultTrustedOrigins = [
     'http://localhost:5173',
-    ...envTrustedOrigins
+    'https://site-builder-static.onrender.com',
 ];
 
-const corsOptions = {
-    origin: trustedOrigins,
+const trustedOrigins = Array.from(new Set([
+    ...defaultTrustedOrigins,
+    ...envTrustedOrigins
+])).filter(Boolean);
+
+const corsOptions: CorsOptions = {
+    origin: (origin, callback) => {
+        if (!origin) {
+            callback(null, true);
+            return;
+        }
+
+        const normalizedOrigin = normalizeOrigin(origin);
+        if (trustedOrigins.includes(normalizedOrigin)) {
+            callback(null, true);
+            return;
+        }
+
+        callback(new Error('Origin not allowed by CORS'));
+    },
     credentials: true,
-}
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
 app.use(cors(corsOptions))
+app.options('/{*any}', cors(corsOptions));
 app.post('/api/stripe', express.raw({type: 'application/json'}), stripeWebhook)
 
 app.all('/api/auth/{*any}', toNodeHandler(auth));
