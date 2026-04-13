@@ -185,6 +185,8 @@ export const iframeScript = `
             }
 
             document.addEventListener('click', function (e) {
+            window.parent.postMessage({ type: 'PREVIEW_CLICK' }, '*');
+
             e.preventDefault();
             e.stopPropagation();
 

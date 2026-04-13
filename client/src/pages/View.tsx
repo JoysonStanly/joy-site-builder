@@ -65,7 +65,7 @@ const View = () => {
     }
   }, [projectId]);
 
-  const trackClick = async () => {
+  const trackClick = useCallback(async () => {
     if (!projectId) {
       return;
     }
@@ -80,11 +80,24 @@ const View = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'PREVIEW_CLICK') {
+        void trackClick();
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [trackClick]);
 
   // Track duration when user leaves
   useEffect(() => {
-    void fetchCode();
+    queueMicrotask(() => {
+      void fetchCode();
+    });
 
     const handleUnload = async () => {
       const duration = startTimeRef.current > 0

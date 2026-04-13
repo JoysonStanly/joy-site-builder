@@ -55,7 +55,9 @@ const MyProjects = () => {
         }
 
         if (session?.user) {
-            void fetchProjects();
+            queueMicrotask(() => {
+                void fetchProjects();
+            });
         } else {
             navigate('/');
             toast('Please login to view your projects');

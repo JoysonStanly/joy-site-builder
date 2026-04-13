@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
@@ -7,7 +7,7 @@ import {
 import {
   ArrowLeftIcon, EyeIcon, MousePointerClickIcon, ActivityIcon,
   Loader2Icon, TrendingUpIcon, TrendingDownIcon, ClockIcon,
-  MonitorIcon, SmartphoneIcon, TabletIcon, GlobeIcon, RefreshCwIcon
+  GlobeIcon, RefreshCwIcon
 } from 'lucide-react';
 import { AxiosError } from 'axios';
 import api from '@/configs/axios';
@@ -43,7 +43,7 @@ const AnalyticsDashboard = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [range, setRange] = useState('7');
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get(`/api/analytics/summary/${projectId}?range=${range}`);
@@ -58,11 +58,11 @@ const AnalyticsDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId, range]);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, [projectId, range]);
+    void fetchAnalytics();
+  }, [fetchAnalytics]);
 
   if (loading) {
     return (
