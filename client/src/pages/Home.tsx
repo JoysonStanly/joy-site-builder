@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { AxiosError } from 'axios';
 
+const trustedByCompanies = ['Framer', 'Huawei', 'Instagram', 'Microsoft', 'Walmart'];
+
 const Home = () => {
 
   const {data: session} = authClient.useSession()
@@ -67,12 +69,15 @@ const Home = () => {
           </button>
         </form>
 
-        <div className="flex flex-wrap items-center justify-center gap-16 md:gap-20 mx-auto mt-16">
-          <img className="max-w-28 md:max-w-32" src="https://saasly.prebuiltui.com/assets/companies-logo/framer.svg" alt="" />
-          <img className="max-w-28 md:max-w-32" src="https://saasly.prebuiltui.com/assets/companies-logo/huawei.svg" alt="" />
-          <img className="max-w-28 md:max-w-32" src="https://saasly.prebuiltui.com/assets/companies-logo/instagram.svg" alt="" />
-          <img className="max-w-28 md:max-w-32" src="https://saasly.prebuiltui.com/assets/companies-logo/microsoft.svg" alt="" />
-          <img className="max-w-28 md:max-w-32" src="https://saasly.prebuiltui.com/assets/companies-logo/walmart.svg" alt="" />
+        <div className="flex flex-wrap items-center justify-center gap-3 mx-auto mt-16 text-gray-300">
+          {trustedByCompanies.map((company) => (
+            <span
+              key={company}
+              className="rounded-full border border-slate-700 bg-white/5 px-4 py-1.5 text-xs uppercase tracking-widest md:text-sm"
+            >
+              {company}
+            </span>
+          ))}
         </div>
       </section>
 
