@@ -3,7 +3,13 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./prisma.js";
 
-const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(',') || [];
+const normalizeOrigin = (origin: string) =>
+  origin.trim().replace(/^['\"]|['\"]$/g, '').replace(/\/$/, '');
+
+const trustedOrigins = process.env.TRUSTED_ORIGINS
+  ?.split(',')
+  .map(normalizeOrigin)
+  .filter(Boolean) || [];
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {

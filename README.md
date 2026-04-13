@@ -78,18 +78,22 @@ npm run dev              # starts Vite dev server
 
 | Variable | Description |
 |---|---|
+| `PORT` | Port Render assigns to the server process |
 | `DATABASE_URL` | PostgreSQL connection string |
 | `BETTER_AUTH_SECRET` | Secret key for better-auth |
 | `BETTER_AUTH_URL` | Base URL of your server |
 | `OPENAI_API_KEY` | OpenAI API key |
 | `STRIPE_SECRET_KEY` | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `TRUSTED_ORIGINS` | Comma-separated frontend origins allowed by CORS and auth |
 
 ### `client/.env`
 
 | Variable | Description |
 |---|---|
-| `VITE_API_URL` | URL of your backend server |
+| `VITE_API_URL` | URL of your backend server on Render |
+
+If you already use `VITE_BASEURL`, the client still supports it for backward compatibility, but `VITE_API_URL` is the preferred name.
 
 ---
 
