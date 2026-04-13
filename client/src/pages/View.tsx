@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Loader2Icon } from "lucide-react";
 import ProjectPreview from "../components/ProjectPreview";
 import type { Project } from "../types";
 import api from "@/configs/axios";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 const getDevice = (): string => {
   const ua = navigator.userAgent;
@@ -28,9 +29,18 @@ const View = () => {
   const { projectId } = useParams();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(true);
-  const startTimeRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(0);
 
-  const fetchCode = async () => {
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+  }, []);
+
+  const fetchCode = useCallback(async () => {
+    if (!projectId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data } = await api.get(`/api/project/published/${projectId}`);
       setCode(data.code);
@@ -44,13 +54,22 @@ const View = () => {
         referrer: getReferrer(),
       });
 
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || error.message);
+    } catch (error: unknown) {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message
+        : error instanceof Error
+          ? error.message
+          : undefined;
+      toast.error(message || 'Failed to load preview');
       console.log(error);
     }
-  };
+  }, [projectId]);
 
   const trackClick = async () => {
+    if (!projectId) {
+      return;
+    }
+
     try {
       await api.post(`/api/analytics/track`, {
         projectId,
@@ -65,10 +84,17 @@ const View = () => {
 
   // Track duration when user leaves
   useEffect(() => {
-    fetchCode();
+    void fetchCode();
 
     const handleUnload = async () => {
-      const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
+      const duration = startTimeRef.current > 0
+        ? Math.round((Date.now() - startTimeRef.current) / 1000)
+        : 0;
+
+      if (!projectId) {
+        return;
+      }
+
       navigator.sendBeacon(
         `${import.meta.env.VITE_API_URL}/api/analytics/track`,
         JSON.stringify({ projectId, eventType: 'duration', duration, device: getDevice(), referrer: getReferrer() })
@@ -77,7 +103,7 @@ const View = () => {
 
     window.addEventListener('beforeunload', handleUnload);
     return () => window.removeEventListener('beforeunload', handleUnload);
-  }, []);
+  }, [fetchCode, projectId]);
 
   if (loading) {
     return (

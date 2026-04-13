@@ -9,6 +9,7 @@ import {
   Loader2Icon, TrendingUpIcon, TrendingDownIcon, ClockIcon,
   MonitorIcon, SmartphoneIcon, TabletIcon, GlobeIcon, RefreshCwIcon
 } from 'lucide-react';
+import { AxiosError } from 'axios';
 import api from '@/configs/axios';
 import { toast } from 'sonner';
 
@@ -27,12 +28,6 @@ interface AnalyticsData {
 }
 
 const COLORS = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
-
-const DeviceIcon = ({ device }: { device: string }) => {
-  if (device === 'Mobile') return <SmartphoneIcon className="size-4" />;
-  if (device === 'Tablet') return <TabletIcon className="size-4" />;
-  return <MonitorIcon className="size-4" />;
-};
 
 const formatDuration = (seconds: number): string => {
   if (seconds < 60) return `${seconds}s`;
@@ -53,8 +48,13 @@ const AnalyticsDashboard = () => {
     try {
       const response = await api.get(`/api/analytics/summary/${projectId}?range=${range}`);
       setData(response.data);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Failed to load analytics');
+    } catch (error: unknown) {
+      const message = error instanceof AxiosError
+        ? error.response?.data?.message
+        : error instanceof Error
+          ? error.message
+          : undefined;
+      toast.error(message || 'Failed to load analytics');
     } finally {
       setLoading(false);
     }

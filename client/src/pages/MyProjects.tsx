@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import api from '@/configs/axios';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
+import { AxiosError } from 'axios';
 
 const MyProjects = () => {
     const { data: session, isPending } = authClient.useSession()
@@ -18,9 +19,14 @@ const MyProjects = () => {
             const { data } = await api.get('/api/user/projects')
             setProjects(data.projects)
             setLoading(false)
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.log(error);
-            toast.error(error?.response?.data?.message || error.message)
+            const message = error instanceof AxiosError
+                ? error.response?.data?.message
+                : error instanceof Error
+                    ? error.message
+                    : undefined;
+            toast.error(message || 'Failed to load projects')
         }
     }
 
@@ -32,20 +38,29 @@ const MyProjects = () => {
             const { data } = await api.delete(`/api/project/${projectId}`)
             toast.success(data.message);
             fetchProjects()
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.log(error);
-            toast.error(error?.response?.data?.message || error.message)
+            const message = error instanceof AxiosError
+                ? error.response?.data?.message
+                : error instanceof Error
+                    ? error.message
+                    : undefined;
+            toast.error(message || 'Failed to delete project')
         }
     }
 
     useEffect(() => {
-        if (session?.user && !isPending) {
-            fetchProjects()
-        } else if (!isPending && !session?.user) {
+        if (isPending) {
+            return;
+        }
+
+        if (session?.user) {
+            void fetchProjects();
+        } else {
             navigate('/');
             toast('Please login to view your projects');
         }
-    }, [session?.user])
+    }, [isPending, navigate, session?.user])
 
     return (
         <>
